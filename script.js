@@ -89,26 +89,134 @@ const fadeObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
 
-/* ---------- Lightbox (shared) ---------- */
+/* ---------- Lightbox with pan + zoom ---------- */
 const lightbox = document.querySelector('.lightbox');
 let openLightbox = null, closeLightbox = null;
 if (lightbox) {
   const lbImg = lightbox.querySelector('img');
   const lbCap = lightbox.querySelector('.lightbox__caption');
+
+  // pan/zoom state (per-open session)
+  let zoom = 1, panX = 0, panY = 0;
+  let dragging = false, lastX = 0, lastY = 0;
+  let pinchDist = 0, pinchZoom0 = 1;
+
+  const apply = () => {
+    lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  };
+  const reset = () => { zoom = 1; panX = 0; panY = 0; apply(); };
+
+  const setZoom = (newZoom, cx, cy) => {
+    const rect = lbImg.getBoundingClientRect();
+    const ox = cx - (rect.left + rect.width / 2);
+    const oy = cy - (rect.top + rect.height / 2);
+    const ratio = newZoom / zoom;
+    panX = (panX - ox) * ratio + ox;
+    panY = (panY - oy) * ratio + oy;
+    zoom = newZoom;
+    apply();
+  };
+
   openLightbox = (src, caption) => {
     lbImg.src = src;
     if (lbCap) lbCap.textContent = caption || '';
+    reset();
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
   };
   closeLightbox = () => {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
-    setTimeout(() => { lbImg.src = ''; }, 200);
+    setTimeout(() => { lbImg.src = ''; reset(); }, 200);
   };
-  lightbox.addEventListener('click', closeLightbox);
+
+  // Mouse wheel zoom (centered on cursor)
+  lightbox.addEventListener('wheel', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    const next = Math.max(1, Math.min(8, zoom * factor));
+    setZoom(next, e.clientX, e.clientY);
+  }, { passive: false });
+
+  // Drag to pan (only when zoomed)
+  lbImg.addEventListener('mousedown', (e) => {
+    if (zoom <= 1) return;
+    dragging = true;
+    lastX = e.clientX; lastY = e.clientY;
+    lbImg.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    panX += e.clientX - lastX;
+    panY += e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    apply();
+  });
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+    lbImg.style.cursor = '';
+  });
+
+  // Double-click to toggle 1x / 2.5x
+  lbImg.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    setZoom(zoom > 1.05 ? 1 : 2.5, e.clientX, e.clientY);
+    if (zoom <= 1.05) reset();
+  });
+
+  // Touch: pinch to zoom, drag to pan
+  lbImg.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchDist = Math.hypot(dx, dy);
+      pinchZoom0 = zoom;
+    } else if (e.touches.length === 1 && zoom > 1) {
+      dragging = true;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  lbImg.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const next = Math.max(1, Math.min(8, pinchZoom0 * (dist / pinchDist)));
+      setZoom(next, cx, cy);
+    } else if (e.touches.length === 1 && dragging) {
+      e.preventDefault();
+      panX += e.touches[0].clientX - lastX;
+      panY += e.touches[0].clientY - lastY;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+      apply();
+    }
+  }, { passive: false });
+  lbImg.addEventListener('touchend', () => { dragging = false; });
+
+  // Click on backdrop closes; click on image does nothing (so dblclick works)
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lbImg) return;
+    closeLightbox();
+  });
+  lbImg.addEventListener('click', (e) => e.stopPropagation());
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === '+' || e.key === '=') {
+      const r = lbImg.getBoundingClientRect();
+      setZoom(Math.min(8, zoom * 1.2), r.left + r.width/2, r.top + r.height/2);
+    } else if (e.key === '-' || e.key === '_') {
+      const r = lbImg.getBoundingClientRect();
+      setZoom(Math.max(1, zoom / 1.2), r.left + r.width/2, r.top + r.height/2);
+    } else if (e.key === '0') reset();
   });
 }
 
@@ -118,6 +226,18 @@ if (lightbox) {
 if (PAGE === 'portfolio') {
   const strip = document.querySelector('.webtoon');
   const counter = document.querySelector('.counter');
+
+  /* reading progress bar (top of viewport) */
+  const progress = document.createElement('div');
+  progress.className = 'read-progress';
+  document.body.appendChild(progress);
+  const updateProgress = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    progress.style.width = pct + '%';
+  };
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
 
   if (strip) {
     const total = parseInt(strip.dataset.pages, 10) || 0;
@@ -208,6 +328,13 @@ if (PAGE === 'deck') {
     const total = parseInt(deck.dataset.pages, 10) || 0;
     const prefix = deck.dataset.prefix;
     const theme = stage ? stage.dataset.theme : null;
+
+    /* cyber-only: drifting scanline overlay */
+    if (theme === 'cyber' && stage) {
+      const scan = document.createElement('div');
+      scan.className = 'deck-scanline';
+      stage.appendChild(scan);
+    }
 
     /* build wrapper + slides */
     const wrapper = document.createElement('div');

@@ -327,7 +327,7 @@ body::before {
 .project__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(26, 22, 18, 0.45) 100%);
+  background: linear-gradient(180deg, transparent 50%, color-mix(in srgb, var(--text) 45%, transparent) 100%);
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
@@ -344,7 +344,7 @@ body::before {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--bg);
-  background: rgba(26, 22, 18, 0.85);
+  background: color-mix(in srgb, var(--text) 88%, transparent);
   backdrop-filter: blur(8px);
   padding: 0.55rem 1rem;
   border-radius: 999px;
@@ -802,6 +802,72 @@ footer {
   animation: cyber-glitch 520ms steps(8, end);
 }
 
+/* HUD corner brackets that fade in on the active slide */
+.deck-stage[data-theme="cyber"] .swiper-slide::before,
+.deck-stage[data-theme="cyber"] .swiper-slide::after {
+  content: '';
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  pointer-events: none;
+  z-index: 5;
+}
+.deck-stage[data-theme="cyber"] .swiper-slide::before {
+  top: clamp(0.9rem, 2.5vw, 1.6rem);
+  left: clamp(0.9rem, 2.5vw, 1.6rem);
+  border-right: none;
+  border-bottom: none;
+}
+.deck-stage[data-theme="cyber"] .swiper-slide::after {
+  bottom: clamp(0.9rem, 2.5vw, 1.6rem);
+  right: clamp(0.9rem, 2.5vw, 1.6rem);
+  border-left: none;
+  border-top: none;
+}
+.deck-stage[data-theme="cyber"] .swiper-slide-active::before,
+.deck-stage[data-theme="cyber"] .swiper-slide-active::after {
+  opacity: 0.7;
+  transition-delay: 0.2s;
+}
+
+/* Subtle RGB chromatic-aberration "breathing" on active image */
+@keyframes cyber-breathe {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); }
+  50%      { filter: drop-shadow(1px 0 0 rgba(196,127,163,0.35)) drop-shadow(-1px 0 0 rgba(109,167,216,0.35));
+             transform: scale(1.005); }
+}
+.deck-stage[data-theme="cyber"] .swiper-slide-active img {
+  animation: cyber-breathe 5.5s ease-in-out infinite;
+}
+.deck-stage[data-theme="cyber"] .swiper-slide-active.glitching img {
+  animation: cyber-glitch 520ms steps(8, end), cyber-breathe 5.5s ease-in-out infinite 0.6s;
+}
+
+/* A drifting bright scan line on top of the stage */
+.deck-stage[data-theme="cyber"] .deck-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent) 80%, transparent) 50%,
+    transparent 100%);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 22;
+  animation: cyber-scan 7s linear infinite;
+}
+@keyframes cyber-scan {
+  0%   { top: -2%; opacity: 0; }
+  10%  { opacity: 0.4; }
+  90%  { opacity: 0.4; }
+  100% { top: 102%; opacity: 0; }
+}
+
 /* ---------- THEME: Quiet Erosion (slow drift / dust grain) ---------- */
 
 .deck-stage[data-theme="erosion"]::after {
@@ -832,10 +898,57 @@ footer {
 
 @media (prefers-reduced-motion: reduce) {
   .deck-stage[data-theme="cyber"] .swiper-slide-active.glitching img,
+  .deck-stage[data-theme="cyber"] .swiper-slide-active img,
+  .deck-stage[data-theme="cyber"] .deck-scanline,
   .deck-stage[data-theme="erosion"]::after,
-  .deck-stage[data-theme="erosion"] .swiper-slide-active img {
+  .deck-stage[data-theme="erosion"] .swiper-slide-active img,
+  .read-progress,
+  body[data-theme="portfolio"]::after {
     animation: none !important;
   }
+}
+
+/* ============================================================
+   PORTFOLIO — ambient side drift + reading progress bar
+   (atmosphere outside the 720px webtoon strip; no decoration
+   on the strip itself, so the manhwa flow stays clean.)
+   ============================================================ */
+
+body[data-theme="portfolio"]::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background:
+    radial-gradient(ellipse at 0% 30%, color-mix(in srgb, var(--accent) 60%, transparent) 0%, transparent 38%),
+    radial-gradient(ellipse at 100% 70%, color-mix(in srgb, var(--accent-warm) 70%, transparent) 0%, transparent 42%);
+  animation: portfolio-drift 28s ease-in-out infinite alternate;
+}
+
+:root[data-mode="dark"] body[data-theme="portfolio"]::after {
+  opacity: 0.18;
+  mix-blend-mode: screen;
+}
+
+@keyframes portfolio-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(2%, -1.5%) scale(1.05); }
+}
+
+/* Reading progress bar (top of viewport, scroll-linked via JS) */
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  z-index: 60;
+  transition: width 0.08s linear;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -934,6 +1047,26 @@ footer {
   max-height: 100%;
   object-fit: contain;
   box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+  cursor: zoom-in;
+  transform-origin: center center;
+  transition: transform 0.16s ease-out;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
+}
+.lightbox img:active { cursor: grabbing; }
+
+.lightbox__hint {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.5);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
 .lightbox__close {
