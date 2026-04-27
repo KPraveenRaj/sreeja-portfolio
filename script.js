@@ -9,6 +9,66 @@
 const PAGE = document.body.dataset.page || 'landing';
 const pad2 = n => String(n).padStart(2, '0');
 
+/* ============================================================
+   DARK MODE — toggle in nav + persisted in localStorage.
+   Initial mode is set in <head> inline script (no FOUC).
+   ============================================================ */
+
+function applyMode(mode) {
+  document.documentElement.dataset.mode = mode;
+  try { localStorage.setItem('mode', mode); } catch (e) {}
+  const btn = document.querySelector('.mode-toggle');
+  if (btn) {
+    btn.querySelector('.mode-toggle__icon').textContent = mode === 'dark' ? '☾' : '☼';
+    btn.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
+    btn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+}
+
+function toggleMode() {
+  const cur = document.documentElement.dataset.mode || 'light';
+  applyMode(cur === 'dark' ? 'light' : 'dark');
+}
+
+(function injectModeToggle() {
+  const nav = document.querySelector('.nav');
+  if (!nav) return;
+  const btn = document.createElement('button');
+  btn.className = 'mode-toggle';
+  btn.type = 'button';
+  btn.innerHTML = '<span class="mode-toggle__icon">☼</span>';
+  // Append to nav__links if it exists (landing), otherwise to .nav directly
+  const links = nav.querySelector('.nav__links');
+  if (links) links.appendChild(btn);
+  else nav.appendChild(btn);
+  btn.addEventListener('click', toggleMode);
+  // sync icon to current mode (set by inline head script)
+  applyMode(document.documentElement.dataset.mode || 'light');
+})();
+
+/* ----- First-visit toast announcing dark mode ----- */
+function showDarkModeToast() {
+  try { if (localStorage.getItem('seenDarkToast') === '1') return; } catch (e) { return; }
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.innerHTML = '<span>Tip: dark mode is available — toggle ☼ / ☾ in the top corner.</span>' +
+    '<button class="toast__close" type="button" aria-label="Dismiss">×</button>';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  let timer = null;
+  const dismiss = () => {
+    if (timer) clearTimeout(timer);
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 350);
+    try { localStorage.setItem('seenDarkToast', '1'); } catch (e) {}
+  };
+  toast.querySelector('.toast__close').addEventListener('click', dismiss);
+  timer = setTimeout(dismiss, 9000);
+}
+setTimeout(showDarkModeToast, 1400);
+
 /* ---------- Sticky nav border on scroll ---------- */
 const nav = document.querySelector('.nav');
 if (nav) {

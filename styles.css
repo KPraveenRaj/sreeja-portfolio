@@ -96,7 +96,7 @@ body::before {
   align-items: center;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  background: rgba(243, 238, 231, 0.72);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
   border-bottom: 1px solid transparent;
   transition: border-color 0.3s var(--ease);
 }
@@ -705,7 +705,7 @@ footer {
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   padding: 0.5rem 0.85rem;
-  background: rgba(26,22,18,0.85);
+  background: color-mix(in srgb, var(--text) 88%, transparent);
   color: var(--bg);
   border-radius: 999px;
   pointer-events: none;
@@ -719,12 +719,12 @@ footer {
   left: 0;
   right: 0;
   height: 2px !important;
-  background: rgba(26,22,18,0.08) !important;
+  background: color-mix(in srgb, var(--text) 12%, transparent) !important;
   z-index: 30;
 }
 
 .deck-progress .swiper-pagination-progressbar-fill {
-  background: var(--text) !important;
+  background: var(--accent) !important;
 }
 
 .deck-nav {
@@ -737,7 +737,7 @@ footer {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(243,238,231,0.85);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
   border: 1px solid var(--line);
   color: var(--text);
   font-family: var(--font-display);
@@ -775,28 +775,6 @@ footer {
 
 /* ---------- THEME: Cyber Play (glitch / scanline on slide change) ---------- */
 
-.deck-stage[data-theme="cyber"] {
-  background: #0d0c10;
-}
-.deck-stage[data-theme="cyber"] .swiper-slide { background: #0d0c10; }
-.deck-stage[data-theme="cyber"] .deck-counter {
-  background: rgba(255,255,255,0.08);
-  color: #d6d2c8;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-.deck-stage[data-theme="cyber"] .deck-progress {
-  background: rgba(255,255,255,0.08) !important;
-}
-.deck-stage[data-theme="cyber"] .deck-progress .swiper-pagination-progressbar-fill {
-  background: #c9c2b4 !important;
-}
-.deck-stage[data-theme="cyber"] .deck-nav {
-  background: rgba(0,0,0,0.4);
-  color: #d6d2c8;
-  border-color: rgba(255,255,255,0.18);
-}
-.deck-stage[data-theme="cyber"] .deck-hint { color: #6b6660; }
-
 .deck-stage[data-theme="cyber"]::after {
   content: '';
   position: absolute;
@@ -825,11 +803,6 @@ footer {
 }
 
 /* ---------- THEME: Quiet Erosion (slow drift / dust grain) ---------- */
-
-.deck-stage[data-theme="erosion"] {
-  background: #ece4d6;
-}
-.deck-stage[data-theme="erosion"] .swiper-slide { background: #ece4d6; }
 
 .deck-stage[data-theme="erosion"]::after {
   content: '';
@@ -874,7 +847,7 @@ footer {
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 40;
-  background: rgba(26, 22, 18, 0.88);
+  background: color-mix(in srgb, var(--text) 90%, transparent);
   color: var(--bg);
   font-family: var(--font-mono);
   font-size: 0.78rem;
@@ -1010,4 +983,175 @@ footer {
     transition-duration: 0.01ms !important;
   }
   html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   THEME SYSTEM — palettes per project + dark mode
+   :root vars are LIGHT LANDING defaults (defined at top of file).
+   Order: dark landing → light/dark per project theme.
+   ============================================================ */
+
+:root[data-mode="dark"] {
+  --bg: #1a1612;
+  --bg-alt: #221d18;
+  --surface: #2a241e;
+  --text: #f3eee7;
+  --text-mid: #d2c6b5;
+  --text-soft: #9b8f81;
+  --line: #3a322a;
+  --accent: #f3eee7;
+  --accent-warm: #d99572;
+}
+
+/* ----- Theme: PORTFOLIO (warm cream + deep navy / gold) ----- */
+body[data-theme="portfolio"] {
+  --bg: #f0eadf;
+  --bg-alt: #e6dec9;
+  --surface: #d8cdb6;
+  --text: #18181f;
+  --text-mid: #4a4a55;
+  --text-soft: #76728a;
+  --line: #cbc0a8;
+  --accent: #1c2a4f;
+  --accent-warm: #b08840;
+}
+:root[data-mode="dark"] body[data-theme="portfolio"] {
+  --bg: #0d1426;
+  --bg-alt: #131c33;
+  --surface: #1c2641;
+  --text: #e8d8b8;
+  --text-mid: #c0b694;
+  --text-soft: #87815f;
+  --line: #2d3a55;
+  --accent: #d4b97a;
+  --accent-warm: #f0b878;
+}
+
+/* ----- Theme: CYBER PLAY (cool minimal in light, neon dark) ----- */
+body[data-theme="cyber"] {
+  --bg: #ecedf2;
+  --bg-alt: #e0e2eb;
+  --surface: #d4d6e0;
+  --text: #15131c;
+  --text-mid: #3d3858;
+  --text-soft: #6b6680;
+  --line: #c7c9d1;
+  --accent: #3d145b;
+  --accent-warm: #c47fa3;
+}
+:root[data-mode="dark"] body[data-theme="cyber"] {
+  --bg: #0d0c10;
+  --bg-alt: #14131a;
+  --surface: #1d1c25;
+  --text: #d6d2c8;
+  --text-mid: #a8a4b4;
+  --text-soft: #6b6660;
+  --line: #2a2832;
+  --accent: #c47fa3;
+  --accent-warm: #6da7d8;
+}
+
+/* ----- Theme: QUIET EROSION (sand + rust / deep earth) ----- */
+body[data-theme="erosion"] {
+  --bg: #ece4d6;
+  --bg-alt: #e2d8c5;
+  --surface: #d3c5ad;
+  --text: #1f1610;
+  --text-mid: #4a3d30;
+  --text-soft: #7a6a55;
+  --line: #c4b598;
+  --accent: #781817;
+  --accent-warm: #b57157;
+}
+:root[data-mode="dark"] body[data-theme="erosion"] {
+  --bg: #1f1610;
+  --bg-alt: #29201a;
+  --surface: #342a22;
+  --text: #ece4d6;
+  --text-mid: #c4b598;
+  --text-soft: #948460;
+  --line: #3d3026;
+  --accent: #b57157;
+  --accent-warm: #d99572;
+}
+
+/* Smooth color transitions when toggling mode */
+body, .nav, .deck-counter, .deck-nav, .counter, .toast, .mode-toggle,
+.project, .experience, .next-project, footer, .gallery__page img,
+.deck-stage, .deck-stage .swiper-slide {
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease),
+              border-color 0.35s var(--ease);
+}
+
+/* Dark-mode tweak: slightly stronger grain so it stays visible */
+:root[data-mode="dark"] body::before { opacity: 0.045; mix-blend-mode: screen; }
+
+/* ============================================================
+   MODE TOGGLE (sun/moon) — injected into nav
+   ============================================================ */
+
+.mode-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  margin-left: 0.6rem;
+  flex-shrink: 0;
+}
+.mode-toggle:hover {
+  background: var(--bg-alt);
+  opacity: 1;
+}
+.mode-toggle__icon { display: inline-block; line-height: 1; }
+
+/* ============================================================
+   FIRST-VISIT TOAST (announces dark mode availability)
+   ============================================================ */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 0.85rem 0.8rem 1.05rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: var(--bg);
+  background: var(--text);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px -12px rgba(0,0,0,0.35);
+  opacity: 0;
+  pointer-events: none;
+  max-width: calc(100vw - 2.5rem);
+}
+.toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+
+.toast__close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0.7;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+.toast__close:hover { opacity: 1; background: color-mix(in srgb, var(--bg) 18%, transparent); }
+
+@media (max-width: 480px) {
+  .toast { font-size: 0.78rem; padding: 0.7rem 0.7rem 0.7rem 0.95rem; }
 }
