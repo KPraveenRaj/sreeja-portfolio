@@ -413,13 +413,15 @@ if (PAGE === 'deck') {
       },
     });
 
-    /* lightbox click on active slide — open lo-res, upgrade to @hi.webp */
+    /* lightbox click on active slide — open lo-res, upgrade to @hi.webp.
+       Use Swiper's own 'click' event: it fires only on real clicks (not after
+       a drag), and is dispatched after Swiper's internal click-suppression
+       gate, so it works immediately on page load without the stale-diff race
+       that a raw DOM 'click' listener hits. */
     if (openLightbox) {
-      deck.addEventListener('click', (e) => {
+      swiper.on('click', (s, e) => {
         const img = e.target.closest('.swiper-slide img');
         if (!img) return;
-        // only trigger if the user actually clicked (not dragged)
-        if (swiper.touches && Math.abs(swiper.touches.diff) > 6) return;
         const idx = parseInt(img.parentElement.dataset.index, 10);
         openLightbox(img.src, `Page ${pad2(idx)} / ${pad2(total)}`, img.dataset.hires);
       });
