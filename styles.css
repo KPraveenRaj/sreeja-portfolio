@@ -637,46 +637,232 @@ footer {
 }
 
 /* ============================================================
-   PROJECT GALLERY
+   PORTFOLIO — WEBTOON / MANHWA CONTINUOUS STRIP
    ============================================================ */
 
-.gallery {
-  padding: 2rem var(--gutter) 6rem;
-  max-width: 1100px;
+.webtoon {
+  max-width: 720px;
   margin: 0 auto;
-}
-
-.gallery__page {
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
-  position: relative;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
-}
-
-.gallery__page.in-view {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.gallery__page img {
-  width: 100%;
+  padding: 2rem 0 4rem;
   background: var(--bg-alt);
-  box-shadow: 0 1px 0 var(--line),
-              0 24px 48px -24px rgba(26, 22, 18, 0.18);
+}
+
+.webtoon img {
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 0;
   cursor: zoom-in;
 }
 
-.gallery__page--landscape img { box-shadow: 0 1px 0 var(--line), 0 18px 40px -20px rgba(26, 22, 18, 0.15); }
+.project-hero__hint {
+  margin-top: 1.25rem;
+  opacity: 0.7;
+}
 
-.gallery__num {
+@media (max-width: 640px) {
+  .webtoon { padding: 1rem 0 3rem; }
+}
+
+/* ============================================================
+   SLIDE DECK (Cyber Play, Quiet Erosion) — Swiper-based
+   ============================================================ */
+
+.deck-stage {
+  position: relative;
+  height: calc(100vh - 0px);
+  min-height: 520px;
+  background: var(--bg-alt);
+  overflow: hidden;
+}
+
+.deck-stage .swiper { height: 100%; width: 100%; }
+
+.deck-stage .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  background: var(--bg-alt);
+}
+
+.deck-stage .swiper-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: zoom-in;
+  box-shadow: 0 24px 60px -28px rgba(26,22,18,0.35);
+  transition: transform 1.2s var(--ease), filter 0.6s var(--ease);
+  will-change: transform;
+}
+
+.deck-counter {
   position: absolute;
-  top: -1.5rem;
-  right: 0;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 30;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  padding: 0.5rem 0.85rem;
+  background: rgba(26,22,18,0.85);
+  color: var(--bg);
+  border-radius: 999px;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.deck-progress {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0;
+  right: 0;
+  height: 2px !important;
+  background: rgba(26,22,18,0.08) !important;
+  z-index: 30;
+}
+
+.deck-progress .swiper-pagination-progressbar-fill {
+  background: var(--text) !important;
+}
+
+.deck-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 25;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(243,238,231,0.85);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.deck-nav:hover { transform: translateY(-50%) scale(1.06); opacity: 1; }
+.deck-nav.prev { left: 1.25rem; }
+.deck-nav.next { right: 1.25rem; }
+.deck-nav.swiper-button-disabled { opacity: 0.25; pointer-events: none; }
+
+.deck-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--text-soft);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+@media (max-width: 640px) {
+  .deck-nav { display: none; }
+  .deck-hint { display: none; }
+}
+
+/* ---------- THEME: Cyber Play (glitch / scanline on slide change) ---------- */
+
+.deck-stage[data-theme="cyber"] {
+  background: #0d0c10;
+}
+.deck-stage[data-theme="cyber"] .swiper-slide { background: #0d0c10; }
+.deck-stage[data-theme="cyber"] .deck-counter {
+  background: rgba(255,255,255,0.08);
+  color: #d6d2c8;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.deck-stage[data-theme="cyber"] .deck-progress {
+  background: rgba(255,255,255,0.08) !important;
+}
+.deck-stage[data-theme="cyber"] .deck-progress .swiper-pagination-progressbar-fill {
+  background: #c9c2b4 !important;
+}
+.deck-stage[data-theme="cyber"] .deck-nav {
+  background: rgba(0,0,0,0.4);
+  color: #d6d2c8;
+  border-color: rgba(255,255,255,0.18);
+}
+.deck-stage[data-theme="cyber"] .deck-hint { color: #6b6660; }
+
+.deck-stage[data-theme="cyber"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0) 0,
+    rgba(255,255,255,0) 2px,
+    rgba(255,255,255,0.025) 3px
+  );
+  mix-blend-mode: screen;
+  z-index: 20;
+}
+
+@keyframes cyber-glitch {
+  0%   { transform: translate(0,0); filter: none; }
+  15%  { transform: translate(-3px, 1px); filter: drop-shadow(2px 0 0 rgba(255,40,80,0.7)) drop-shadow(-2px 0 0 rgba(40,200,255,0.7)); }
+  30%  { transform: translate(2px,-1px); filter: drop-shadow(-2px 0 0 rgba(255,40,80,0.6)) drop-shadow(2px 0 0 rgba(40,200,255,0.6)); }
+  45%  { transform: translate(-1px, 0); filter: drop-shadow(1px 0 0 rgba(255,40,80,0.4)) drop-shadow(-1px 0 0 rgba(40,200,255,0.4)); }
+  100% { transform: translate(0,0); filter: none; }
+}
+
+.deck-stage[data-theme="cyber"] .swiper-slide-active.glitching img {
+  animation: cyber-glitch 520ms steps(8, end);
+}
+
+/* ---------- THEME: Quiet Erosion (slow drift / dust grain) ---------- */
+
+.deck-stage[data-theme="erosion"] {
+  background: #ece4d6;
+}
+.deck-stage[data-theme="erosion"] .swiper-slide { background: #ece4d6; }
+
+.deck-stage[data-theme="erosion"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: erosion-drift 18s linear infinite;
+}
+
+@keyframes erosion-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 240px -240px; }
+}
+
+@keyframes erosion-kenburns {
+  from { transform: scale(1.0) translate(0,0); }
+  to   { transform: scale(1.035) translate(-0.5%, 0.4%); }
+}
+
+.deck-stage[data-theme="erosion"] .swiper-slide-active img {
+  animation: erosion-kenburns 9s var(--ease) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-stage[data-theme="cyber"] .swiper-slide-active.glitching img,
+  .deck-stage[data-theme="erosion"]::after,
+  .deck-stage[data-theme="erosion"] .swiper-slide-active img {
+    animation: none !important;
+  }
 }
 
 /* ============================================================
