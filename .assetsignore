@@ -1,0 +1,8 @@
+*.pdf
+*.zip
+*.md
+.git
+.github
+.gitignore
+.assetsignore
+wrangler.toml
