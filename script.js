@@ -117,12 +117,22 @@ if (lightbox) {
     apply();
   };
 
-  openLightbox = (src, caption) => {
-    lbImg.src = src;
+  openLightbox = (loSrc, caption, hiSrc) => {
+    // show low-res immediately, then upgrade to hi-res when it loads
+    lbImg.src = loSrc;
     if (lbCap) lbCap.textContent = caption || '';
     reset();
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
+    if (hiSrc && hiSrc !== loSrc) {
+      const pre = new Image();
+      pre.onload = () => {
+        if (lightbox.classList.contains('active') && lbImg.src.indexOf(loSrc) >= 0) {
+          lbImg.src = hiSrc;
+        }
+      };
+      pre.src = hiSrc;
+    }
   };
   closeLightbox = () => {
     lightbox.classList.remove('active');
@@ -246,9 +256,10 @@ if (PAGE === 'portfolio') {
     const frag = document.createDocumentFragment();
     for (let i = 1; i <= total; i++) {
       const img = document.createElement('img');
-      img.src = `images/${prefix}/page-${pad2(i)}.jpg`;
+      img.src = `images/${prefix}/page-${pad2(i)}.webp`;
       img.alt = `Page ${i}`;
       img.dataset.index = String(i);
+      img.dataset.hires = `images/${prefix}/page-${pad2(i)}@hi.webp`;
       img.loading = i <= 2 ? 'eager' : 'lazy';
       img.decoding = 'async';
       frag.appendChild(img);
@@ -279,13 +290,13 @@ if (PAGE === 'portfolio') {
       if (nextProj) new IntersectionObserver(es => { es.forEach(e => { atBottom = e.isIntersecting; update(); }); }).observe(nextProj);
     }
 
-    /* lightbox click */
+    /* lightbox click — open lo-res, upgrade to @hi.webp when it loads */
     if (openLightbox) {
       strip.addEventListener('click', (e) => {
         const img = e.target.closest('img');
         if (!img) return;
         const idx = img.dataset.index;
-        openLightbox(img.src, `Page ${pad2(idx)} / ${pad2(total)}`);
+        openLightbox(img.src, `Page ${pad2(idx)} / ${pad2(total)}`, img.dataset.hires);
       });
     }
 
@@ -344,8 +355,9 @@ if (PAGE === 'deck') {
       slide.className = 'swiper-slide';
       slide.dataset.index = String(i);
       const img = document.createElement('img');
-      img.src = `images/${prefix}/page-${pad2(i)}.jpg`;
+      img.src = `images/${prefix}/page-${pad2(i)}.webp`;
       img.alt = `Page ${i}`;
+      img.dataset.hires = `images/${prefix}/page-${pad2(i)}@hi.webp`;
       img.loading = i <= 2 ? 'eager' : 'lazy';
       img.decoding = 'async';
       slide.appendChild(img);
@@ -401,7 +413,7 @@ if (PAGE === 'deck') {
       },
     });
 
-    /* lightbox click on active slide image */
+    /* lightbox click on active slide — open lo-res, upgrade to @hi.webp */
     if (openLightbox) {
       deck.addEventListener('click', (e) => {
         const img = e.target.closest('.swiper-slide img');
@@ -409,7 +421,7 @@ if (PAGE === 'deck') {
         // only trigger if the user actually clicked (not dragged)
         if (swiper.touches && Math.abs(swiper.touches.diff) > 6) return;
         const idx = parseInt(img.parentElement.dataset.index, 10);
-        openLightbox(img.src, `Page ${pad2(idx)} / ${pad2(total)}`);
+        openLightbox(img.src, `Page ${pad2(idx)} / ${pad2(total)}`, img.dataset.hires);
       });
     }
   }

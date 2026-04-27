@@ -846,26 +846,39 @@ footer {
   animation: cyber-glitch 520ms steps(8, end), cyber-breathe 5.5s ease-in-out infinite 0.6s;
 }
 
-/* A drifting bright scan line on top of the stage */
+/* Soft ray of accent light drifting top -> bottom BEHIND the slides.
+   Reads as ambient stage lighting in the letterbox area around the
+   contained image, not a hard scanline cutting across content. */
 .deck-stage[data-theme="cyber"] .deck-scanline {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--accent) 80%, transparent) 50%,
-    transparent 100%);
-  opacity: 0.35;
+  left: -10%;
+  right: -10%;
+  height: clamp(80px, 14vh, 160px);
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--accent) 65%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 28%, transparent) 38%,
+    transparent 75%
+  );
+  filter: blur(10px);
+  opacity: 0;
+  mix-blend-mode: screen;
   pointer-events: none;
-  z-index: 22;
-  animation: cyber-scan 7s linear infinite;
+  z-index: 0;
+  animation: cyber-scan 11s linear infinite;
 }
+
+/* Slides sit above the ray */
+.deck-stage[data-theme="cyber"] .swiper {
+  position: relative;
+  z-index: 1;
+}
+
 @keyframes cyber-scan {
-  0%   { top: -2%; opacity: 0; }
-  10%  { opacity: 0.4; }
-  90%  { opacity: 0.4; }
-  100% { top: 102%; opacity: 0; }
+  0%   { top: -22%; opacity: 0; }
+  18%  { opacity: 0.22; }
+  82%  { opacity: 0.22; }
+  100% { top: 110%; opacity: 0; }
 }
 
 /* ---------- THEME: Quiet Erosion (slow drift / dust grain) ---------- */
